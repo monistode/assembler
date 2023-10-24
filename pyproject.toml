@@ -8,6 +8,7 @@ packages = [{include = "monistode_assembler"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+monistode-binutils-shared = "^0.1.0"
 
 
 [build-system]
