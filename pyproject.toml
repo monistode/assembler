@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "monistode-assembler"
+version = "0.1.0"
+description = "An assembler for the Monistode set of ISA's"
+authors = ["rizerphe <44440399+rizerphe@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "monistode_assembler"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
