@@ -21,18 +21,19 @@ class PaddingParser:
         """Initialize the parser
 
         Args:
-            n_bits (int): The number of bits in the immediate
+            n_bits (int): The number of bits in the padding
         """
         self.n_bits = n_bits
 
     def attempt_scan(self, line: str, offset: int) -> Padding | None:
-        """Attempt to scan an immediate argument from the line
+        """Attempt to scan a padding argument from the line
 
         Args:
             line (str): The line to parse
             offset (int): The offset to start parsing from
 
         Returns:
-            Immediate | None: The parsed immediate, or None if the line does not
+            Padding | None: The parsed padding, or None if the line does not
+                contain a padding
         """
         return Padding(self.n_bits)

@@ -1,4 +1,4 @@
-"""A parser for an immediate argument"""
+"""A parser for a label in the text section"""
 from dataclasses import dataclass
 import re
 
@@ -10,7 +10,7 @@ from monistode_binutils_shared.relocation import (
 
 @dataclass
 class Label:
-    """An immediate argument"""
+    """A label in the text section"""
 
     length_in_chars: int
     n_bits: int
@@ -20,27 +20,28 @@ class Label:
 
 
 class LabelParser:
-    """A parser for an immediate argument"""
+    """A parser for a label"""
 
     def __init__(self, n_bits: int, relative: bool = False):
         """Initialize the parser
 
         Args:
-            n_bits (int): The number of bits in the immediate
-            relative (bool, optional): Whether the immediate is relative to the
+            n_bits (int): The number of bits in the address
+            relative (bool, optional): Whether the address is relative to the
+                current address. Defaults to False.
         """
         self.n_bits = n_bits
         self.relative = relative
 
     def attempt_scan(self, line: str, offset: int) -> Label | None:
-        """Attempt to scan an immediate argument from the line
+        """Attempt to scan a label from the line
 
         Args:
             line (str): The line to parse
             offset (int): The offset to start parsing from
 
         Returns:
-            Immediate | None: The parsed immediate, or None if the line does not
+            Label | None: The parsed label, or None if no label was found
         """
         # detect all ascii followed by either whitespace of a comma
         match = re.match(r"([a-zA-Z_][a-zA-Z0-9_]*)(?:\s|,|$)", line[offset:])

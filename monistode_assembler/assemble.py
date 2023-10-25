@@ -60,6 +60,15 @@ class Assembler:
     def signatures_for(
         self, command: ConfigurationCommand
     ) -> Iterator[tuple[ArgumentParser[TextArgument], ...]]:
+        """Generate all possible signatures for a command.
+
+        Args:
+            command (ConfigurationCommand): The command to generate signatures for
+
+        Yields:
+            tuple[ArgumentParser[TextArgument], ...]: The signature,
+                as a tuple of argument parsers
+        """
         for signature in itertools.product(
             *(argument.get_parsers() for argument in command.arguments)
         ):
