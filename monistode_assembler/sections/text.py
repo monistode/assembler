@@ -111,7 +111,7 @@ class TextSectionParser:
             )
 
     def add_label(self, label: str) -> None:
-        self.text.add_symbol(label)
+        self.text.add_raw_symbol(label)
 
     def get(self) -> Text:
         """Finish parsing the text section and return the result."""

@@ -4,6 +4,7 @@ from monistode_binutils_shared.object_manager import ObjectManager
 from monistode_binutils_shared.section.text import Text
 
 from monistode_assembler.description import Configuration
+from monistode_binutils_shared.section.symbol_table import SymbolTable
 
 from .disassemble_text import TextDisassembler
 
@@ -20,7 +21,9 @@ class Disassembler:
         """
         self._configuration = configuration
         self._object_manager = ObjectManager.from_bytes(binary)
-        self._object_manager.load()
+
+    def disassemble_header(self) -> str:
+        return self._object_manager.summary()
 
     def disassemble(self) -> str:
         """Disassemble a binary file into a list of instructions.
@@ -44,7 +47,7 @@ class Disassembler:
         ]
 
         return "\n\n".join(
-            [self._object_manager.summary()] + sections_disassembled_formatted
+            [self.disassemble_header()] + sections_disassembled_formatted
         )
 
     def raw_display(self, section: Section) -> str:
@@ -73,4 +76,9 @@ class Disassembler:
         """
         if isinstance(section, Text):
             return TextDisassembler(self._configuration).disassemble(section)
+        if isinstance(section, SymbolTable):
+            return "\n".join(
+                f"{symbol.location.section.rjust(10)}:{symbol.location.offset:08x} {symbol.name}"
+                for symbol in section
+            )
         return section

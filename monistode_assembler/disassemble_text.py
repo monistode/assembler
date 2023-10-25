@@ -58,6 +58,7 @@ class TextDisassembler:
         disassembly: list[str] = []
         notes: list[str] = []
         addresses: list[int] = []
+        symbols = section.symbols
         used_symbols: list[list[str]] = []
         while True:
             try:
@@ -68,8 +69,8 @@ class TextDisassembler:
                 )
                 new_symbols = [
                     symbol.name
-                    for symbol in section.symbols
-                    if symbol.location.offset >= instructions.address
+                    for symbol in symbols
+                    if symbol.location.offset <= instructions.address
                 ]
                 used_symbols.append(new_symbols)
                 symbols = [
@@ -87,7 +88,7 @@ class TextDisassembler:
         ):
             output.append(
                 "\n".join(
-                    [f"    {symbol}" for symbol in new_symbols]
+                    [f"    {symbol}:" for symbol in new_symbols]
                     + [
                         bin(address).zfill(self.configuration.text_address_size)[2:]
                         + f": {line_disassembly.ljust(max_disassembly_length)} # {note}"

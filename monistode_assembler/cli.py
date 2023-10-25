@@ -29,13 +29,17 @@ def assemble(source, destination, configuration) -> None:
 @click.argument("configuration", type=click.File("r"))
 @click.argument("source", type=click.File("rb"))
 @click.argument("destination", type=click.File("w"), default="-")
-def disassemble(source, destination, configuration) -> None:
+@click.option("--header-only", is_flag=True)
+def disassemble(source, destination, configuration, header_only) -> None:
     """Disassemble an object file into a source file."""
     disassembler = Disassembler(
         configuration=Configuration(**yaml.safe_load(configuration)),
         binary=source.read(),
     )
-    disassembled = disassembler.disassemble()
+    if header_only:
+        disassembled = disassembler.disassemble_header()
+    else:
+        disassembled = disassembler.disassemble()
     destination.write(disassembled + "\n")
 
 
