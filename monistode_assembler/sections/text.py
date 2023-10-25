@@ -1,6 +1,5 @@
 """The text section parser of the assembler."""
 from dataclasses import dataclass
-from typing import Protocol
 
 from monistode_binutils_shared.relocation import SymbolRelocationParams
 from monistode_binutils_shared.section.text import Text
@@ -8,24 +7,7 @@ from monistode_binutils_shared.section.text import Text
 from ..arguments.common import ArgumentParser
 from ..command import Command
 from ..exceptions import AssemblyError
-
-
-class TextArgument(Protocol):
-    """A candidate for the text section argument"""
-
-    length_in_chars: int
-
-    @property
-    def asint(self) -> int:
-        """The argument as a big integer"""
-
-    @property
-    def n_bits(self) -> int:
-        """The number of bits in the argument"""
-
-    @property
-    def symbols(self) -> tuple[SymbolRelocationParams, ...]:
-        """The symbols in the argument"""
+from .text_argument import TextArgument
 
 
 @dataclass
@@ -35,6 +17,7 @@ class CommandDefinition:
     mnemonic: str
     opcode: int
     arguments: tuple[ArgumentParser[TextArgument], ...]
+    pre_opcode_arguments: int
 
 
 @dataclass
@@ -43,6 +26,7 @@ class TextSectionParameters:
 
     byte: int
     opcode_length: int
+    opcode_offset: int
     text_address_bits: int
     data_address_bits: int
 
@@ -66,19 +50,31 @@ class TextSectionParser:
         """Get all possible signatures of a command."""
         return tuple(cmd.arguments for cmd in self.commands if cmd.mnemonic == command)
 
-    def command_opcode(self, command: str) -> int:
-        """Get the opcode of a command."""
-        return next(cmd.opcode for cmd in self.commands if cmd.mnemonic == command)
+    def configuration_command(self, command: str) -> CommandDefinition:
+        """Get the configuration of a command."""
+        return next(cmd for cmd in self.commands if cmd.mnemonic == command)
 
     def add_command(self, command: Command[TextArgument]) -> None:
         """Add a command to the text section."""
-        command_code: int = self.command_opcode(command.name)
-        command_bits: int = self.parameters.opcode_length
+        configuration_command = self.configuration_command(command.name)
+        n_pre_opcode_arguments = configuration_command.pre_opcode_arguments
+        command_code: int = 0
+        command_bits: int = 0
 
-        for argument in command.args:
-            while command_bits // self.parameters.byte:
-                self.text.add_byte(command_code % 2**self.parameters.byte)
-                command_code >>= self.parameters.byte
+        if n_pre_opcode_arguments == 0:
+            command_code = configuration_command.opcode
+            command_bits = self.parameters.opcode_length
+
+        for i, argument in enumerate(command.args):
+            while command_bits >= self.parameters.byte:
+                offset = (
+                    command_bits % self.parameters.byte
+                    + command_bits // self.parameters.byte * self.parameters.byte
+                    - self.parameters.byte
+                )
+                extracted_byte = command_code >> offset
+                self.text.add_byte(extracted_byte)
+                command_code -= extracted_byte << offset
                 command_bits -= self.parameters.byte
 
             bit_offset = command_bits % self.parameters.byte
@@ -93,9 +89,20 @@ class TextSectionParser:
             command_code |= argument.asint % 2**argument.n_bits
             command_bits += argument.n_bits
 
-        while command_bits // self.parameters.byte:
-            self.text.add_byte(command_code % 2**self.parameters.byte)
-            command_code >>= self.parameters.byte
+            if i == n_pre_opcode_arguments - 1:
+                command_code <<= self.parameters.opcode_length
+                command_code |= configuration_command.opcode
+                command_bits += self.parameters.opcode_length
+
+        while command_bits >= self.parameters.byte:
+            offset = (
+                command_bits % self.parameters.byte
+                + command_bits // self.parameters.byte * self.parameters.byte
+                - self.parameters.byte
+            )
+            extracted_byte = command_code >> offset
+            self.text.add_byte(extracted_byte)
+            command_code -= extracted_byte << offset
             command_bits -= self.parameters.byte
 
         if command_bits:

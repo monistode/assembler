@@ -22,6 +22,7 @@ class Assembler:
             TextSectionParser(
                 parameters=TextSectionParameters(
                     byte=configuration.text_byte_length,
+                    opcode_offset=configuration.opcode_offset,
                     opcode_length=configuration.opcode_length,
                     text_address_bits=configuration.text_address_size,
                     data_address_bits=configuration.data_address_size,
@@ -32,6 +33,9 @@ class Assembler:
                         opcode=command.opcode,
                         arguments=tuple(
                             argument.get_parser() for argument in command.arguments
+                        ),
+                        pre_opcode_arguments=command.get_n_pre_opcode_arguments(
+                            configuration.opcode_offset
                         ),
                     )
                     for command in configuration.commands

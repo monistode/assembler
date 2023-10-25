@@ -20,5 +20,9 @@ class AssemblyError(AssemblerError):
     """An error that occurred while assembling an assembly source file."""
 
 
+class DisassemblyError(AssemblerError):
+    """An error that occurred while disassembling a binary file."""
+
+
 class ParserError(AssemblerError):
     """An error that occurred while parsing an assembly source file."""
