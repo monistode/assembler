@@ -1,3 +1,4 @@
+from dataclasses import field
 from typing import Literal
 
 from pydantic.dataclasses import dataclass
@@ -27,9 +28,13 @@ class ConfigurationImmediateArgument:
 class RelativeTextAddressArgument:
     type: Literal["text_addr"]
     bits: int
+    relative: bool = field(default=False)
 
     def get_parsers(self) -> tuple[ArgumentParser[TextArgument], ...]:
-        return (AddressParser(self.bits), LabelParser(self.bits))
+        return (
+            AddressParser(self.bits),
+            LabelParser(self.bits, relative=self.relative),
+        )
 
     def to_string(self, value: int) -> str:
         return str(value)

@@ -79,7 +79,7 @@ class TextSectionParser:
 
             bit_offset = command_bits % self.parameters.byte
             for symbol in argument.symbols:
-                self.text.add_relocation(
+                self.text.add_raw_relocation(
                     SymbolRelocationParams(
                         symbol.target, symbol.offset + bit_offset, symbol.relative
                     )

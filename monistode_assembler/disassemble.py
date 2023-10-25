@@ -4,6 +4,7 @@ from monistode_binutils_shared.object_manager import ObjectManager
 from monistode_binutils_shared.section.text import Text
 
 from monistode_assembler.description import Configuration
+from monistode_binutils_shared.section.relocation_table import RelocationTable
 from monistode_binutils_shared.section.symbol_table import SymbolTable
 
 from .disassemble_text import TextDisassembler
@@ -40,7 +41,7 @@ class Disassembler:
             f".{name}"
             + (
                 (" # (not disassembled)\n" + self.raw_display(section))
-                if section is None
+                if not isinstance(section, str)
                 else f"\n{section}"
             )
             for name, section in sections_disassembled
@@ -64,6 +65,7 @@ class Disassembler:
             if i % 16 == 0:
                 lines.append(f"{i:08x}:")
             lines[-1] += f" {byte:02x}"
+        return "\n".join(lines)
 
     def disassemble_section(self, section: Section) -> str | Section:
         """Disassemble a section of a binary file into a list of instructions.
@@ -78,7 +80,17 @@ class Disassembler:
             return TextDisassembler(self._configuration).disassemble(section)
         if isinstance(section, SymbolTable):
             return "\n".join(
-                f"{symbol.location.section.rjust(10)}:{symbol.location.offset:08x} {symbol.name}"
+                f"{symbol.location.section.rjust(10)}:{symbol.location.offset:08x}"
+                f"        {symbol.name}"
                 for symbol in section
+            )
+        if isinstance(section, RelocationTable):
+            return "\n".join(
+                f"{relocation.location.section.rjust(10)}:{relocation.location.offset:08x}"
+                f" + {relocation.offset}bits"
+                f"        {relocation.symbol.section_name} -> "
+                f"{relocation.symbol.name}, "
+                + ("relative" if relocation.relative else "absolute")
+                for relocation in section
             )
         return section

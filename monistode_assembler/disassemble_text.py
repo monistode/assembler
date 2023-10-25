@@ -90,7 +90,9 @@ class TextDisassembler:
                 "\n".join(
                     [f"    {symbol}:" for symbol in new_symbols]
                     + [
-                        bin(address).zfill(self.configuration.text_address_size)[2:]
+                        hex(address)[2:].zfill(
+                            -(-self.configuration.text_address_size // 4)
+                        )
                         + f": {line_disassembly.ljust(max_disassembly_length)} # {note}"
                     ]
                 )
