@@ -1,12 +1,18 @@
 """Assemble a program into an object file."""
+import itertools
+from typing import Iterator
+
 from monistode_binutils_shared import ObjectManager, ObjectParameters
 
+from monistode_assembler.arguments.common import ArgumentParser
+from monistode_assembler.command_description import ConfigurationCommand
 from monistode_assembler.sections.common import SectionParser
 from monistode_assembler.sections.text import (
     CommandDefinition,
     TextSectionParameters,
     TextSectionParser,
 )
+from monistode_assembler.sections.text_argument import TextArgument
 
 from .description import Configuration
 from .parse import Parser
@@ -31,14 +37,13 @@ class Assembler:
                     CommandDefinition(
                         mnemonic=command.mnemonic,
                         opcode=command.opcode,
-                        arguments=tuple(
-                            argument.get_parser() for argument in command.arguments
-                        ),
+                        arguments=signature,
                         pre_opcode_arguments=command.get_n_pre_opcode_arguments(
                             configuration.opcode_offset
                         ),
                     )
                     for command in configuration.commands
+                    for signature in self.signatures_for(command)
                 ],
             ),
         ]
@@ -51,6 +56,14 @@ class Assembler:
             data_address=configuration.data_address_size,
         )
         self._manager = ObjectManager(self._object_parameters)
+
+    def signatures_for(
+        self, command: ConfigurationCommand
+    ) -> Iterator[tuple[ArgumentParser[TextArgument], ...]]:
+        for signature in itertools.product(
+            *(argument.get_parsers() for argument in command.arguments)
+        ):
+            yield signature
 
     def assemble(self, source: str) -> bytes:
         """Assemble a program from a source file."""

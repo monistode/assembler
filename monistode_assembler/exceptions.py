@@ -15,6 +15,14 @@ class AssemblerError(Exception):
         self.line_number = line_number
         self.message = message
 
+    def __str__(self) -> str:
+        """Return the error message."""
+        return (
+            f"{self.message} (line {self.line_number})"
+            if self.line_number
+            else self.message
+        )
+
 
 class AssemblyError(AssemblerError):
     """An error that occurred while assembling an assembly source file."""
