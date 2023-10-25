@@ -15,7 +15,7 @@ T_co = TypeVar("T_co", bound=Argument, covariant=True)
 class ArgumentParser(Protocol[T_co]):
     """A parser for a specific argument type"""
 
-    def attempt_scan(self, line: str, offset: int) -> T_co:
+    def attempt_scan(self, line: str, offset: int) -> T_co | None:
         """Attempt to scan the argument from the line
 
         Args:

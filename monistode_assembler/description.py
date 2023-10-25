@@ -5,8 +5,10 @@ from typing import Literal
 from pydantic.dataclasses import dataclass
 import yaml
 
+from monistode_assembler.arguments.common import ArgumentParser
 from monistode_assembler.arguments.immediate import ImmediateParser
 from monistode_assembler.arguments.padding import PaddingParser
+from monistode_assembler.sections.text import TextArgument
 
 
 @dataclass
@@ -14,7 +16,7 @@ class ConfigurationImmediateArgument:
     type: Literal["immediate"]
     bits: int
 
-    def get_parser(self) -> ImmediateParser:
+    def get_parser(self) -> ArgumentParser[TextArgument]:
         return ImmediateParser(self.bits)
 
 
@@ -23,7 +25,7 @@ class ConfigurationPaddingArgument:
     type: Literal["padding"]
     bits: int
 
-    def get_parser(self) -> PaddingParser:
+    def get_parser(self) -> ArgumentParser[TextArgument]:
         return PaddingParser(self.bits)
 
 
