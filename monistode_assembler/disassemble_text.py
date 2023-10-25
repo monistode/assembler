@@ -101,8 +101,8 @@ class TextDisassembler:
         esoteric weirdness that might make it 6 bits long.
         """
         if self.configuration.text_byte_length % 4:
-            return hex(byte)[2:].zfill(self.configuration.text_byte_length // 4)
-        return bin(byte)[2:].zfill(self.configuration.text_byte_length)
+            return bin(byte)[2:].zfill(self.configuration.text_byte_length)
+        return hex(byte)[2:].zfill(self.configuration.text_byte_length // 4)
 
     def _disassemble(self, instructions: Iterator[int]) -> str:
         """Disassemble the given instruction.
