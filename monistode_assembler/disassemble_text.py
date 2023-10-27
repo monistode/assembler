@@ -70,7 +70,7 @@ class TextDisassembler:
                 new_symbols = [
                     symbol.name
                     for symbol in symbols
-                    if symbol.location.offset <= instructions.address
+                    if symbol.location.offset < instructions.address
                 ]
                 used_symbols.append(new_symbols)
                 symbols = [

@@ -81,7 +81,10 @@ class TextSectionParser:
             for symbol in argument.symbols:
                 self.text.add_raw_relocation(
                     SymbolRelocationParams(
-                        symbol.target, symbol.offset + bit_offset, symbol.relative
+                        symbol.target,
+                        symbol.size,
+                        symbol.offset + bit_offset,
+                        symbol.relative,
                     )
                 )
 

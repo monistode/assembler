@@ -52,7 +52,10 @@ class LabelParser:
             n_bits=self.n_bits,
             symbols=(
                 SymbolRelocationParams(
-                    RelocationTargetSymbol(match.group(1), "text"), 0, self.relative
+                    RelocationTargetSymbol(match.group(1), "text"),
+                    size=16,
+                    offset=0,
+                    relative=self.relative,
                 ),
             ),
         )

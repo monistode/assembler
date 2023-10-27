@@ -87,7 +87,7 @@ class Disassembler:
         if isinstance(section, RelocationTable):
             return "\n".join(
                 f"{relocation.location.section.rjust(10)}:{relocation.location.offset:08x}"
-                f" + {relocation.offset}bits"
+                f" + {relocation.offset}bits ({relocation.size}-bit)"
                 f"        {relocation.symbol.section_name} -> "
                 f"{relocation.symbol.name}, "
                 + ("relative" if relocation.relative else "absolute")
