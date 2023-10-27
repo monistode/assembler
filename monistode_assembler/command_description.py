@@ -49,7 +49,6 @@ class RelativeTextAddressArgument:
         end_of_command_offset: int,
     ) -> str:
         if relocations_for_argument:
-            print(end_of_command_offset)
             offset = value - end_of_command_offset
             if offset < 0:
                 offset += 1 << self.bits
