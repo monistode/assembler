@@ -1,6 +1,7 @@
 """A disassembler for the text section of a monistode binary."""
 from typing import Iterator
 
+from monistode_binutils_shared.relocation import SymbolRelocation
 from monistode_binutils_shared.section.text import Text
 
 from monistode_assembler.exceptions import DisassemblyError
@@ -63,7 +64,11 @@ class TextDisassembler:
         while True:
             try:
                 addresses.append(instructions.address)
-                disassembly.append(self._disassemble(instructions))
+                disassembly.append(
+                    self._disassemble(
+                        instructions, instructions.address, section.relocations
+                    )
+                )
                 notes.append(
                     " ".join(self.pprint_byte(byte) for byte in instructions.pop())
                 )
@@ -107,7 +112,12 @@ class TextDisassembler:
             return bin(byte)[2:].zfill(self.configuration.text_byte_length)
         return hex(byte)[2:].zfill(self.configuration.text_byte_length // 4)
 
-    def _disassemble(self, instructions: Iterator[int]) -> str:
+    def _disassemble(
+        self,
+        instructions: Iterator[int],
+        command_address: int,
+        relocations: list[SymbolRelocation],
+    ) -> str:
         """Disassemble the given instruction.
 
         Args:
@@ -125,6 +135,10 @@ class TextDisassembler:
                 n_pre_opcode_arguments = command.get_n_pre_opcode_arguments(
                     self.configuration.opcode_offset
                 )
+                command_length = (
+                    sum(argument.bits for argument in command.arguments)
+                    + self.configuration.opcode_length
+                )
                 if n_pre_opcode_arguments == 0:
                     offset += self.configuration.opcode_length
                 for i, argument in enumerate(command.arguments):
@@ -140,7 +154,29 @@ class TextDisassembler:
                         offset - argument.bits,
                         argument.bits,
                     )
-                    arg_strings.append(argument.to_string(argument_value))
+                    # Find all relocatiosn that cover this argument.
+                    relocations_for_argument = [
+                        relocation
+                        for relocation in relocations
+                        if relocation.location.offset
+                        == command_address
+                        + (
+                            (offset - argument.bits)
+                            // self.configuration.text_byte_length
+                        )
+                        and relocation.size == argument.bits
+                        and relocation.offset
+                        == (offset - argument.bits)
+                        % self.configuration.text_byte_length
+                    ]
+                    arg_strings.append(
+                        argument.to_string(
+                            argument_value,
+                            relocations_for_argument,
+                            (offset - argument.bits - command_length)
+                            // self.configuration.text_byte_length,
+                        )
+                    )
 
                     if i == n_pre_opcode_arguments - 1:
                         offset += self.configuration.opcode_length

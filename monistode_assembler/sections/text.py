@@ -65,6 +65,12 @@ class TextSectionParser:
             command_code = configuration_command.opcode
             command_bits = self.parameters.opcode_length
 
+        command_bytes = (
+            sum(argument.n_bits for argument in command.args)
+            + self.parameters.opcode_length
+        ) // self.parameters.byte
+        acc_bytes: int = 0
+
         for i, argument in enumerate(command.args):
             while command_bits >= self.parameters.byte:
                 offset = (
@@ -76,8 +82,10 @@ class TextSectionParser:
                 self.text.add_byte(extracted_byte)
                 command_code -= extracted_byte << offset
                 command_bits -= self.parameters.byte
+                acc_bytes += 1
 
             bit_offset = command_bits % self.parameters.byte
+            overlay_offsets: list[tuple[int, int, int]] = []
             for symbol in argument.symbols:
                 self.text.add_raw_relocation(
                     SymbolRelocationParams(
@@ -87,10 +95,19 @@ class TextSectionParser:
                         symbol.relative,
                     )
                 )
+                relocation_byte_offset = acc_bytes - command_bytes
+                overlay_offsets.append(
+                    (symbol.offset + bit_offset, relocation_byte_offset, symbol.size)
+                )
 
             command_code <<= argument.n_bits
             command_code |= argument.asint % 2**argument.n_bits
             command_bits += argument.n_bits
+
+            for start, offset, size in overlay_offsets:
+                command_code = self.add_overlay(
+                    command_code, command_bits, start, offset, size
+                )
 
             if i == n_pre_opcode_arguments - 1:
                 command_code <<= self.parameters.opcode_length
@@ -112,6 +129,25 @@ class TextSectionParser:
             raise AssemblyError(
                 f"Command {command.name} has {command_bits} bits left over"
             )
+
+    def add_overlay(
+        self, command_code: int, command_bits: int, start: int, offset: int, size: int
+    ) -> int:
+        """Add an overlay to a relocation.
+
+        Takes the bits start - start + size, and adds offset to them.
+        Uses 2-complement to add the offset. Assumes command_code is
+        of length command_bits.
+        """
+        bits_till_end = command_bits - start - size
+        overlay_mask = ((1 << size) - 1) << bits_till_end
+        original_value = (command_code & overlay_mask) >> bits_till_end
+        new_value = original_value + offset
+        if new_value < 0:
+            new_value += 2**size
+        elif new_value >= 2**size:
+            new_value -= 2**size
+        return (command_code & ~overlay_mask) | (new_value << bits_till_end)
 
     def add_label(self, label: str) -> None:
         self.text.add_raw_symbol(label)
