@@ -133,16 +133,19 @@ class TextDisassembler:
                 arg_strings: list[str] = []
                 offset: int = 0
                 n_pre_opcode_arguments = command.get_n_pre_opcode_arguments(
-                    self.configuration.opcode_offset
+                    self.configuration.opcode_offset, self.configuration
                 )
                 command_length = (
-                    sum(argument.bits for argument in command.arguments)
+                    sum(
+                        argument.length_bits(self.configuration)
+                        for argument in command.arguments
+                    )
                     + self.configuration.opcode_length
                 )
                 if n_pre_opcode_arguments == 0:
                     offset += self.configuration.opcode_length
                 for i, argument in enumerate(command.arguments):
-                    offset += argument.bits
+                    offset += argument.length_bits(self.configuration)
                     while offset > self.configuration.text_byte_length * len(
                         command_instructions
                     ):
@@ -151,8 +154,8 @@ class TextDisassembler:
                     argument_value = self.extract_argument(
                         self.instructions_to_command(command_instructions),
                         len(command_instructions),
-                        offset - argument.bits,
-                        argument.bits,
+                        offset - argument.length_bits(self.configuration),
+                        argument.length_bits(self.configuration),
                     )
                     # Find all relocatiosn that cover this argument.
                     relocations_for_argument = [
@@ -161,20 +164,25 @@ class TextDisassembler:
                         if relocation.location.offset
                         == command_address
                         + (
-                            (offset - argument.bits)
+                            (offset - argument.length_bits(self.configuration))
                             // self.configuration.text_byte_length
                         )
-                        and relocation.size == argument.bits
+                        and relocation.size == argument.length_bits(self.configuration)
                         and relocation.offset
-                        == (offset - argument.bits)
+                        == (offset - argument.length_bits(self.configuration))
                         % self.configuration.text_byte_length
                     ]
                     arg_strings.append(
                         argument.to_string(
                             argument_value,
                             relocations_for_argument,
-                            (offset - argument.bits - command_length)
+                            (
+                                offset
+                                - argument.length_bits(self.configuration)
+                                - command_length
+                            )
                             // self.configuration.text_byte_length,
+                            self.configuration,
                         )
                     )
 

@@ -8,7 +8,7 @@ packages = [{include = "monistode_assembler"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-monistode-binutils-shared = "0.1.7"
+monistode-binutils-shared = "0.1.8"
 pydantic = "^2.4.2"
 pyyaml = "^6.0.1"
 clck = "^1.0.0"

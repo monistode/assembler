@@ -7,7 +7,7 @@ from ..arguments import Argument, ArgumentParser
 from ..command import Command
 
 
-T = TypeVar("T", bound=Argument, covariant=True)
+T = TypeVar("T", bound=Argument)
 
 
 class SectionParser(Protocol[T]):
@@ -20,7 +20,7 @@ class SectionParser(Protocol[T]):
     ) -> tuple[tuple[ArgumentParser[T], ...], ...]:
         """Get the possible signatures for a command."""
 
-    def add_command(self, command: Command) -> None:
+    def add_command(self, command: Command[T]) -> None:
         """Add a command to the section."""
 
     def add_label(self, label: str) -> None:

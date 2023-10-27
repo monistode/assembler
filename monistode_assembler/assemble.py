@@ -39,7 +39,7 @@ class Assembler:
                         opcode=command.opcode,
                         arguments=signature,
                         pre_opcode_arguments=command.get_n_pre_opcode_arguments(
-                            configuration.opcode_offset
+                            configuration.opcode_offset, configuration
                         ),
                     )
                     for command in configuration.commands
@@ -70,7 +70,10 @@ class Assembler:
                 as a tuple of argument parsers
         """
         for signature in itertools.product(
-            *(argument.get_parsers() for argument in command.arguments)
+            *(
+                argument.get_parsers(self._configuration)
+                for argument in command.arguments
+            )
         ):
             yield signature
 
