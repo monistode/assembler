@@ -97,7 +97,7 @@ class LabelParser:
             int: The offset of the label and the number of characters parsed
         """
         # First we find a plus literal and all the whitespace after it
-        match = re.match(r"\+\s*", line[offset:])
+        match = re.match(r"^\s*\+\s*", line[offset:])
         if match is None:
             return 0, 0
         # Then we find the address
