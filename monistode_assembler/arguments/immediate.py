@@ -1,5 +1,6 @@
 """A parser for an immediate argument"""
 from dataclasses import dataclass
+import json
 import re
 
 from monistode_binutils_shared.relocation import SymbolRelocationParams
@@ -49,6 +50,9 @@ class ImmediateParser:
         if length is not None:
             return self._parse(line, offset, length)
         length = self._attempt_scan_binary(line, offset)
+        if length is not None:
+            return self._parse(line, offset, length)
+        length = self._attempt_scan_chars(line, offset)
         if length is not None:
             return self._parse(line, offset, length)
         return None
@@ -101,6 +105,31 @@ class ImmediateParser:
             return None
         return result.end()
 
+    def _attempt_scan_chars(self, line: str, offset: int) -> int | None:
+        """Attempt to scan a sequence of characters from the line
+
+        Args:
+            line (str): The line to parse
+            offset (int): The offset to start parsing from
+
+        Returns:
+            int | None: The length of the sequence in characters, or None if the
+                line does not contain the sequence
+        """
+        # in format 'chars' or "chars"
+        if line[offset] not in ('"', "'"):
+            return None
+        opening_quote = line[offset]
+        offset += 1
+        while offset < len(line) and line[offset] != opening_quote:
+            if line[offset] == "\\":
+                offset += 2
+            else:
+                offset += 1
+        if offset >= len(line):
+            return None
+        return offset
+
     def _parse(self, line: str, offset: int, length: int) -> Immediate:
         """Parse an immediate from the line
 
@@ -112,7 +141,14 @@ class ImmediateParser:
         Returns:
             Immediate: The parsed immediate
         """
-        value = int(line[offset : offset + length], base=0)
+        if line[offset] in "'\"":
+            # This is a string immediate
+            value = 0
+            for c in json.loads(line[offset : offset + length - 1]):
+                value <<= 8
+                value |= ord(c)
+        else:
+            value = int(line[offset : offset + length], base=0)
         if value >= 2**self.n_bits:
             raise ParserError(
                 f"Immediate value {value} is too large for {self.n_bits}-bit immediate"
