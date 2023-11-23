@@ -105,6 +105,47 @@ class RelativeTextAddressArgument:
 
 
 @dataclass
+class RelativeDataAddressArgument:
+    type: Literal["data_address"]
+    bits: int
+    relative: bool = field(default=False)
+
+    def get_parsers(
+        self, configuration: "Configuration"
+    ) -> tuple[ArgumentParser[TextArgument], ...]:
+        return (
+            AddressParser(self.bits),
+            LabelParser(self.bits, relative=self.relative),
+        )
+
+    def to_string(
+        self,
+        value: int,
+        relocations_for_argument: list[SymbolRelocation],
+        end_of_command_offset: int,
+        configuration: "Configuration",
+    ) -> str:
+        if relocations_for_argument:
+            offset = value - end_of_command_offset
+            if offset < 0:
+                offset += 1 << self.bits
+            if offset >= 1 << self.bits:
+                offset -= 1 << self.bits
+            return " + ".join(
+                [
+                    ("ABSOLUTE " if not relocation.relative and self.relative else "")
+                    + ("OFFSET " if relocation.relative and not self.relative else "")
+                    + relocation.symbol.name
+                    for relocation in relocations_for_argument
+                ]
+            ) + (f" + {offset}" if offset else "")
+        return str(value)
+
+    def length_bits(self, configuration: "Configuration") -> int:
+        return self.bits
+
+
+@dataclass
 class ConfigurationPaddingArgument:
     type: Literal["padding"]
     bits: int
@@ -139,8 +180,9 @@ class ConfigurationCommand:
         ConfigurationImmediateArgument
         | ConfigurationPaddingArgument
         | RelativeTextAddressArgument
+        | RelativeDataAddressArgument
         | ConfigurationRegisterArgument
-    ]
+    ] = field(default_factory=list)
 
     def get_n_pre_opcode_arguments(
         self, opcode_offset: int, configuration: "Configuration"

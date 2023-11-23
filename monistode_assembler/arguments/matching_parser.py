@@ -25,11 +25,15 @@ class MatchingParser:
         runs = [self._parse(line, signature) for signature in signatures]
         candidates = [candidate for candidate in runs if candidate is not None]
         if len(candidates) == 0:
-            raise ParserError(
-                f"Could not parse arguments: {line}: no matching signature"
-            )
+            raise ParserError("Could not parse arguments: no matching signature")
         if len(candidates) > 1:
-            raise ParserError(f"Line matches {len(candidates)} signatures: {line}")
+            raise ParserError(
+                f"Line matches {len(candidates)} signatures - "
+                + ", ".join(
+                    " ".join(type(argument).__name__ for argument in candidate)
+                    for candidate in candidates
+                )
+            )
         return candidates[0]
 
     def _parse(

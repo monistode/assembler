@@ -27,6 +27,7 @@ class Parser:
                 self._parse_line(line)
             except AssemblerError as error:
                 error.line_number = line_number
+                error.line_content = line
                 raise error
         return self.generate_sections()
 
