@@ -7,6 +7,7 @@ from monistode_binutils_shared import ObjectManager, ObjectParameters
 from monistode_assembler.arguments.common import ArgumentParser
 from monistode_assembler.command_description import ConfigurationCommand
 from monistode_assembler.sections.common import SectionParser
+from monistode_assembler.sections.data import DataSectionParameters, DataSectionParser
 from monistode_assembler.sections.text import (
     CommandDefinition,
     TextSectionParameters,
@@ -45,6 +46,12 @@ class Assembler:
                     for command in configuration.commands
                     for signature in self.signatures_for(command)
                 ],
+            ),
+            DataSectionParser(
+                parameters=DataSectionParameters(
+                    byte=configuration.data_byte_length,
+                    data_address_bits=configuration.data_address_size,
+                )
             ),
         ]
         self._parser = Parser(section_parsers)
