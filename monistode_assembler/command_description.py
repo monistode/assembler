@@ -145,6 +145,8 @@ class ConfigurationCommand:
     def get_n_pre_opcode_arguments(
         self, opcode_offset: int, configuration: "Configuration"
     ) -> int:
+        if not self.arguments:
+            return 0
         offset = 0
         for n_pre_opcode_arguments, argument in enumerate(self.arguments):
             if offset == opcode_offset:
