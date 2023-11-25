@@ -8,6 +8,7 @@ class DataArgument(Protocol):
     """A candidate for the data section argument"""
 
     length_in_chars: int
+    type_name: str
 
     @property
     def asbytes(self) -> bytes:

@@ -12,6 +12,8 @@ from ..exceptions import ParserError
 class Immediate:
     """An immediate argument"""
 
+    type_name = "immediate"
+
     length_in_chars: int
     value: int
     asint: int
@@ -21,6 +23,8 @@ class Immediate:
 
 class ImmediateParser:
     """A parser for an immediate argument"""
+
+    type_name = "immediate"
 
     def __init__(self, n_bits: int) -> None:
         """Initialize the parser

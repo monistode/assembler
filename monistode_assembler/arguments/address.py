@@ -11,6 +11,8 @@ from ..exceptions import ParserError
 class Address:
     """An address argument"""
 
+    type_name = "address"
+
     length_in_chars: int
     value: int
     asint: int
@@ -20,6 +22,8 @@ class Address:
 
 class AddressParser:
     """A parser for an address argument"""
+
+    type_name = "address"
 
     def __init__(self, n_bits: int) -> None:
         """Initialize the parser

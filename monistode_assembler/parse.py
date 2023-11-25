@@ -54,7 +54,7 @@ class Parser:
             self._parse_line(line[0 if label is None else len(label) + 1 :])
             return
         command = self._parse_command(line)
-        if command is None:
+        if command is None or command.startswith("#"):
             return
         command = command.lower()
         arguments = self._parse_arguments(command, line[len(command) :])
@@ -110,10 +110,12 @@ class Parser:
     def _parse_command(self, line: str) -> str | None:
         """Parse a command."""
         first_whitespace = self._find_whitespace(line)
-        if first_whitespace == -1:
-            first_whitespace = line.find("#")
+        if "#" in line:
+            first_whitespace = min(line.find("#"), first_whitespace)
         if first_whitespace == -1:
             return line
+        if first_whitespace == 0:
+            return None
         return line[:first_whitespace]
 
     def _parse_arguments(

@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 class Register:
     """A register"""
 
+    type_name = "register"
+
     length_in_chars: int
     value: int
     asint: int
@@ -23,6 +25,8 @@ class Register:
 
 class RegisterParser:
     """A parser for a register argument"""
+
+    type_name = "register"
 
     def __init__(self, group: RegisterGroup) -> None:
         """Initialize the parser

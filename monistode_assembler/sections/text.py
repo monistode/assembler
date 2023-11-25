@@ -50,13 +50,24 @@ class TextSectionParser:
         """Get all possible signatures of a command."""
         return tuple(cmd.arguments for cmd in self.commands if cmd.mnemonic == command)
 
-    def configuration_command(self, command: str) -> CommandDefinition:
+    def configuration_command(
+        self, command: str, arguments: tuple[TextArgument, ...]
+    ) -> CommandDefinition:
         """Get the configuration of a command."""
-        return next(cmd for cmd in self.commands if cmd.mnemonic == command)
+        return next(
+            cmd
+            for cmd in self.commands
+            if cmd.mnemonic == command
+            and len(cmd.arguments) == len(arguments)
+            and all(
+                argument.type_name == argument_parser.type_name
+                for argument, argument_parser in zip(arguments, cmd.arguments)
+            )
+        )
 
     def add_command(self, command: Command[TextArgument]) -> None:
         """Add a command to the text section."""
-        configuration_command = self.configuration_command(command.name)
+        configuration_command = self.configuration_command(command.name, command.args)
         n_pre_opcode_arguments = configuration_command.pre_opcode_arguments
         command_code: int = 0
         command_bits: int = 0

@@ -14,6 +14,8 @@ from .address import AddressParser
 class Label:
     """A label in the text section"""
 
+    type_name = "address"
+
     length_in_chars: int
     n_bits: int
     symbols: tuple[SymbolRelocationParams, ...]
@@ -23,6 +25,8 @@ class Label:
 
 class LabelParser:
     """A parser for a label"""
+
+    type_name = "label"
 
     def __init__(self, n_bits: int, relative: bool = False):
         """Initialize the parser

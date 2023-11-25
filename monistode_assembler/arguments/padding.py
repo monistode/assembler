@@ -8,6 +8,8 @@ from monistode_binutils_shared.relocation import SymbolRelocationParams
 class Padding:
     """A padding pseudo-argument"""
 
+    type_name = "padding"
+
     n_bits: int
     length_in_chars: int = 0
     asint: int = 0
@@ -16,6 +18,8 @@ class Padding:
 
 class PaddingParser:
     """A parser for a padding pseudo-argument"""
+
+    type_name = "padding"
 
     def __init__(self, n_bits: int) -> None:
         """Initialize the parser

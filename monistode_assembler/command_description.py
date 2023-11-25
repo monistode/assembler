@@ -67,7 +67,7 @@ class ConfigurationImmediateArgument:
 class RelativeTextAddressArgument:
     type: Literal["text_address"]
     bits: int
-    relative: bool = field(default=False)
+    relative: bool = field(default=True)
 
     def get_parsers(
         self, configuration: "Configuration"

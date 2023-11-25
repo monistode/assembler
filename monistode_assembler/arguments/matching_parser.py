@@ -62,6 +62,9 @@ class MatchingParser:
                 return None
             arguments.append(argument)
             offset += argument.length_in_chars
+        offset = self._skip_delimiters(line, offset)
+        if offset < len(line) and line[offset] != "#":
+            return None
         return tuple(arguments)
 
     def _skip_delimiters(self, line: str, offset: int) -> int:

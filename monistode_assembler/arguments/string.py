@@ -9,6 +9,8 @@ from monistode_binutils_shared.relocation import SymbolRelocationParams
 class String:
     """A candidate for the data section argument"""
 
+    type_name = "string"
+
     raw_string: str
     termination: bytes
 
@@ -29,6 +31,8 @@ class String:
 
 class StringParser:
     """A parser for a specific argument type"""
+
+    type_name = "string"
 
     def __init__(self, termination: bytes) -> None:
         self.termination = termination

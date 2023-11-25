@@ -8,6 +8,7 @@ class TextArgument(Protocol):
     """A candidate for the text section argument"""
 
     length_in_chars: int
+    type_name: str
 
     @property
     def asint(self) -> int:
