@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monistode-assembler"
-version = "0.1.14"
+version = "0.1.15"
 description = "An assembler for the Monistode set of ISA's"
 authors = ["rizerphe <44440399+rizerphe@users.noreply.github.com>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ packages = [{include = "monistode_assembler"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-monistode-binutils-shared = "0.1.14"
+monistode-binutils-shared = "^0.1.15"
 pydantic = "^2.4.2"
 pyyaml = "^6.0.1"
 clck = "^1.0.0"
