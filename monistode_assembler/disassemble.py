@@ -1,11 +1,11 @@
 """Disassemble a binary file into a list of instructions."""
 from monistode_binutils_shared import Section
 from monistode_binutils_shared.object_manager import ObjectManager
+from monistode_binutils_shared.section.relocation_table import RelocationTable
+from monistode_binutils_shared.section.symbol_table import SymbolTable
 from monistode_binutils_shared.section.text import Text
 
 from monistode_assembler.description import Configuration
-from monistode_binutils_shared.section.relocation_table import RelocationTable
-from monistode_binutils_shared.section.symbol_table import SymbolTable
 
 from .disassemble_text import TextDisassembler
 
@@ -87,8 +87,7 @@ class Disassembler:
         if isinstance(section, RelocationTable):
             return "\n".join(
                 f"{relocation.location.section.rjust(10)}:{relocation.location.offset:08x}"
-                f" + {relocation.offset}bits ({relocation.size}-bit)"
-                f"        {relocation.symbol.section_name} -> "
+                f" + {relocation.offset}bits ({relocation.size}-bit) -> "
                 f"{relocation.symbol.name}, "
                 + ("relative" if relocation.relative else "absolute")
                 for relocation in section
