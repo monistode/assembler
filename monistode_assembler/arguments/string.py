@@ -44,7 +44,7 @@ class StringParser:
             line (str): The line to scan
             offset (int): The offset to start scanning from
         """
-        if line[offset] != '"':
+        if offset >= len(line) or line[offset] != '"':
             return None
         end = offset + 1
         while end < len(line):

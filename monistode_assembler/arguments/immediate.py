@@ -44,7 +44,7 @@ class ImmediateParser:
         Returns:
             Immediate | None: The parsed immediate, or None if the line does not
         """
-        if line[offset] != "$":
+        if offset >= len(line) or line[offset] != "$":
             return None
         offset += 1
         length = self._attempt_scan_decimal(line, offset)
@@ -121,7 +121,7 @@ class ImmediateParser:
                 line does not contain the sequence
         """
         # in format 'chars' or "chars"
-        if line[offset] not in ('"', "'"):
+        if offset >= len(line) or line[offset] not in ('"', "'"):
             return None
         opening_quote = line[offset]
         offset += 1
@@ -145,7 +145,7 @@ class ImmediateParser:
         Returns:
             Immediate: The parsed immediate
         """
-        if line[offset] in "'\"":
+        if offset < len(line) and line[offset] in "'\"":
             # This is a string immediate
             value = 0
             for c in json.loads(line[offset : offset + length - 1]):

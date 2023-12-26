@@ -46,7 +46,7 @@ class RegisterParser:
         Returns:
             Immediate | None: The parsed immediate, or None if the line does not
         """
-        if line[offset] != "%":
+        if offset >= len(line) or line[offset] != "%":
             return None
         offset += 1
         match = re.match(r"[a-zA-Z]+", line[offset:])

@@ -53,10 +53,6 @@ class MatchingParser:
         arguments = []
         for parser in signature:
             offset = self._skip_delimiters(line, offset)
-            if offset >= len(line):
-                return None
-            if line[offset] == "#":
-                return None
             argument = parser.attempt_scan(line, offset)
             if argument is None:
                 return None

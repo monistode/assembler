@@ -19,7 +19,8 @@ class ArgumentParser(Protocol[T_co]):
     type_name: str
 
     def attempt_scan(self, line: str, offset: int) -> T_co | None:
-        """Attempt to scan the argument from the line
+        """Attempt to scan the argument from the line. Should
+        not break if the offset is more than the length of the line.
 
         Args:
             line (str): The line to scan
