@@ -157,20 +157,23 @@ class TextDisassembler:
                         offset - argument.length_bits(self.configuration),
                         argument.length_bits(self.configuration),
                     )
-                    # Find all relocatiosn that cover this argument.
+                    # Find all relocations that cover this argument or part of it.
+                    # (yes, this does mean that labels are not always disassembled
+                    # correctly, but that's a feature, not a bug)
+                    arg_start = command_address + (
+                        (offset - argument.length_bits(self.configuration))
+                        // self.configuration.text_byte_length
+                    )
                     relocations_for_argument = [
                         relocation
                         for relocation in relocations
                         if relocation.location.offset
-                        == command_address
-                        + (
-                            (offset - argument.length_bits(self.configuration))
-                            // self.configuration.text_byte_length
+                        in range(
+                            arg_start,
+                            arg_start
+                            + argument.length_bits(self.configuration)
+                            // self.configuration.text_byte_length,
                         )
-                        and relocation.size == argument.length_bits(self.configuration)
-                        and relocation.offset
-                        == (offset - argument.length_bits(self.configuration))
-                        % self.configuration.text_byte_length
                     ]
                     arg_strings.append(
                         argument.to_string(

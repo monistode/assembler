@@ -14,6 +14,7 @@ from monistode_assembler.arguments.register_address import RegisterAddressParser
 from monistode_assembler.arguments.register_address_offset import (
     RegisterAddressOffsetParser,
 )
+from monistode_assembler.arguments.register_offset import RegisterOffsetParser
 from monistode_assembler.exceptions import AssemblyError, DisassemblyError
 from monistode_assembler.sections.text_argument import TextArgument
 
@@ -122,11 +123,81 @@ class ConfigurationRegisterAddressOffsetArgument:
             if relocations_for_argument
             else str(value)
         )
-        register_id = value >> self.offset_bits + self.padding_bits
+        register_id = value >> (self.offset_bits + self.padding_bits)
         return f"[%{configuration.register_groups[self.group][register_id]} + {offset_string}]"
 
     def length_bits(self, configuration: "Configuration") -> int:
-        return configuration.register_groups[self.group].length
+        return (
+            configuration.register_groups[self.group].length
+            + self.offset_bits
+            + self.padding_bits
+        )
+
+
+@dataclass
+class ConfigurationRegisterOffsetArgument:
+    type: Literal["register_offset"]
+    group: str
+    offset_bits: int
+    padding_bits: int
+    relative: bool = field(default=False)
+
+    def get_parsers(
+        self, configuration: "Configuration"
+    ) -> tuple[ArgumentParser[TextArgument], ...]:
+        return (
+            RegisterOffsetParser(
+                configuration.register_groups[self.group],
+                self.padding_bits,
+                self.offset_bits,
+                self.relative,
+            ),
+        )
+
+    def to_string(
+        self,
+        value: int,
+        relocations_for_argument: list[SymbolRelocation],
+        end_of_command_offset: int,
+        configuration: "Configuration",
+    ) -> str:
+        offset = (value & 1 << self.offset_bits - 1) - end_of_command_offset
+        if offset < 0:
+            offset += 1 << self.offset_bits
+        if offset >= 1 << self.offset_bits:
+            offset -= 1 << self.offset_bits
+        offset_string = (
+            (
+                " + ".join(
+                    [
+                        (
+                            "ABSOLUTE "
+                            if not relocation.relative and self.relative
+                            else ""
+                        )
+                        + (
+                            "OFFSET "
+                            if relocation.relative and not self.relative
+                            else ""
+                        )
+                        + relocation.symbol.name
+                        for relocation in relocations_for_argument
+                    ]
+                )
+                + (f" + {offset}" if offset else "")
+            )
+            if relocations_for_argument
+            else str(value)
+        )
+        register_id = value >> self.offset_bits + self.padding_bits
+        return f"%{configuration.register_groups[self.group][register_id]} + {offset_string}"
+
+    def length_bits(self, configuration: "Configuration") -> int:
+        return (
+            configuration.register_groups[self.group].length
+            + self.offset_bits
+            + self.padding_bits
+        )
 
 
 @dataclass
@@ -230,6 +301,7 @@ class ConfigurationCommand:
         | AddressArgument
         | ConfigurationRegisterArgument
         | ConfigurationRegisterAddressArgument
+        | ConfigurationRegisterOffsetArgument
         | ConfigurationRegisterAddressOffsetArgument
     ] = field(default_factory=list)
 

@@ -70,8 +70,8 @@ class LabelParser:
         Returns:
             Label | None: The parsed label, or None if no label was found
         """
-        # detect all ascii followed by either whitespace of a comma
-        match = re.match(r"([a-zA-Z_][a-zA-Z0-9_]*)(?:\s|,|$)", line[offset:])
+        # detect all ascii followed by either whitespace, a plus sign or a comma
+        match = re.match(r"([a-zA-Z_][a-zA-Z0-9_]*)(?:\s|,)?", line[offset:])
         if match is None:
             return None
         offset, n_offset_chars = self.attempt_scan_offset(line, offset + match.end())
