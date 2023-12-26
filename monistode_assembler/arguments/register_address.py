@@ -1,4 +1,4 @@
-"""A parser for a label in the text section"""
+"""A parser for am addressation by register in the text section"""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -45,7 +45,7 @@ class RegisterAddressParser:
             offset (int): The offset to start parsing from
 
         Returns:
-            RegisterAddress | None: The parsed label, or None if no label was found
+            RegisterAddress | None: The parsed addressation, or None if no label was found
         """
         if offset >= len(line) or line[offset] != "[":
             return None

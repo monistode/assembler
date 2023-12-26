@@ -124,7 +124,7 @@ class AddressParser:
                 f"Address value {value} is too small for {self.n_bits}-bit address"
             )
         return Address(
-            length_in_chars=length + 1,
+            length_in_chars=length,
             value=value,
             asint=value,
             n_bits=self.n_bits,
