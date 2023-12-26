@@ -10,6 +10,7 @@ from monistode_assembler.arguments.immediate import ImmediateParser
 from monistode_assembler.arguments.label import LabelParser
 from monistode_assembler.arguments.padding import PaddingParser
 from monistode_assembler.arguments.regiser import RegisterParser
+from monistode_assembler.arguments.register_address import RegisterAddressParser
 from monistode_assembler.exceptions import AssemblyError, DisassemblyError
 from monistode_assembler.sections.text_argument import TextArgument
 
@@ -35,6 +36,29 @@ class ConfigurationRegisterArgument:
         configuration: "Configuration",
     ) -> str:
         return f"%{configuration.register_groups[self.group][value]}"
+
+    def length_bits(self, configuration: "Configuration") -> int:
+        return configuration.register_groups[self.group].length
+
+
+@dataclass
+class ConfigurationRegisterAddressArgument:
+    type: Literal["register_address"]
+    group: str
+
+    def get_parsers(
+        self, configuration: "Configuration"
+    ) -> tuple[ArgumentParser[TextArgument], ...]:
+        return (RegisterAddressParser(configuration.register_groups[self.group]),)
+
+    def to_string(
+        self,
+        value: int,
+        relocations_for_argument: list[SymbolRelocation],
+        end_of_command_offset: int,
+        configuration: "Configuration",
+    ) -> str:
+        return f"[%{configuration.register_groups[self.group][value]}]"
 
     def length_bits(self, configuration: "Configuration") -> int:
         return configuration.register_groups[self.group].length
@@ -182,6 +206,7 @@ class ConfigurationCommand:
         | RelativeTextAddressArgument
         | RelativeDataAddressArgument
         | ConfigurationRegisterArgument
+        | ConfigurationRegisterAddressArgument
     ] = field(default_factory=list)
 
     def get_n_pre_opcode_arguments(
