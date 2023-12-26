@@ -49,7 +49,7 @@ class RegisterParser:
         if offset >= len(line) or line[offset] != "%":
             return None
         offset += 1
-        match = re.match(r"[a-zA-Z]+", line[offset:])
+        match = re.match(r"[a-zA-Z0-9]+", line[offset:])
         if match is None:
             return None
         register_name = match.group(0)
