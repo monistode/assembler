@@ -15,8 +15,7 @@ if TYPE_CHECKING:
 class RegisterAddress:
     """An addressation by register"""
 
-    type_name = "register_address"
-
+    type_name: str
     length_in_chars: int
     value: int
     asint: int
@@ -27,8 +26,6 @@ class RegisterAddress:
 class RegisterAddressParser:
     """A parser for an addressation by register"""
 
-    type_name = "register_address"
-
     def __init__(self, group: RegisterGroup) -> None:
         """Initialize the parser
 
@@ -36,6 +33,15 @@ class RegisterAddressParser:
             group (RegisterGroup): The register group to parse from
         """
         self.group = group
+
+    @property
+    def type_name(self) -> str:
+        registers = sorted(
+            self.group.registers
+            if isinstance(self.group.registers, list)
+            else list(self.group.registers.keys())
+        )
+        return f"{'|'.join(registers)} register_address"
 
     def attempt_scan(self, line: str, offset: int) -> RegisterAddress | None:
         """Attempt to scan a register address from the line
@@ -57,6 +63,7 @@ class RegisterAddressParser:
         if line[register.length_in_chars + 1 + offset] != "]":
             return None
         return RegisterAddress(
+            self.type_name,
             register.length_in_chars + 2,
             register.value,
             register.asint,

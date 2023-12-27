@@ -14,8 +14,7 @@ if TYPE_CHECKING:
 class Register:
     """A register"""
 
-    type_name = "register"
-
+    type_name: str
     length_in_chars: int
     value: int
     asint: int
@@ -26,8 +25,6 @@ class Register:
 class RegisterParser:
     """A parser for a register argument"""
 
-    type_name = "register"
-
     def __init__(self, group: RegisterGroup) -> None:
         """Initialize the parser
 
@@ -35,6 +32,15 @@ class RegisterParser:
             group (RegisterGroup): The register group to parse from
         """
         self.group = group
+
+    @property
+    def type_name(self) -> str:
+        registers = sorted(
+            self.group.registers
+            if isinstance(self.group.registers, list)
+            else list(self.group.registers.keys())
+        )
+        return f"{'|'.join(registers)} register"
 
     def attempt_scan(self, line: str, offset: int) -> Register | None:
         """Attempt to scan an immediate argument from the line
@@ -57,6 +63,7 @@ class RegisterParser:
         if register_index is None:
             return None
         return Register(
+            type_name=self.type_name,
             length_in_chars=len(register_name) + 1,
             value=register_index,
             asint=register_index,

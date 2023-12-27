@@ -15,8 +15,7 @@ if TYPE_CHECKING:
 class RegisterAddressOffset:
     """An addressation by register with an offset"""
 
-    type_name = "register_address_offset"
-
+    type_name: str
     length_in_chars: int
     address: int
     register: int
@@ -27,8 +26,6 @@ class RegisterAddressOffset:
 
 class RegisterAddressOffsetParser:
     """A parser for an addressation by register with an offset"""
-
-    type_name = "register_address_offset"
 
     def __init__(
         self, group: RegisterGroup, padding_bits: int, offset_bits: int, relative: bool
@@ -45,6 +42,15 @@ class RegisterAddressOffsetParser:
         self.padding_bits = padding_bits
         self.offset_bits = offset_bits
         self.relative = relative
+
+    @property
+    def type_name(self) -> str:
+        registers = sorted(
+            self.group.registers
+            if isinstance(self.group.registers, list)
+            else list(self.group.registers.keys())
+        )
+        return f"{'|'.join(registers)} register_address_offset"
 
     def attempt_scan(self, line: str, offset: int) -> RegisterAddressOffset | None:
         """Attempt to scan a register address from the line
@@ -73,6 +79,7 @@ class RegisterAddressOffsetParser:
             return None
 
         return RegisterAddressOffset(
+            self.type_name,
             register_address_offset.length_in_chars + 2,
             register_address_offset.address,
             register_address_offset.register,
