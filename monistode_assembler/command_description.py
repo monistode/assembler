@@ -222,7 +222,7 @@ class ConfigurationImmediateArgument:
                 "$"
                 + " + ".join(
                     [
-                        ("ABSOLUTE " if not relocation.relative else "")
+                        ("OFFSET " if relocation.relative else "")
                         + relocation.symbol.name
                         for relocation in relocations_for_argument
                     ]
