@@ -21,7 +21,7 @@ class String:
     @property
     def asbytes(self) -> bytes:
         """The argument as bytes"""
-        return (json.loads(self.raw_string) + self.termination).encode("utf-8")
+        return json.loads(self.raw_string).encode("utf-8") + self.termination
 
     @property
     def symbols(self) -> tuple[SymbolRelocationParams, ...]:
