@@ -217,6 +217,18 @@ class ConfigurationImmediateArgument:
         end_of_command_offset: int,
         configuration: "Configuration",
     ) -> str:
+        if relocations_for_argument:
+            return (
+                "$"
+                + " + ".join(
+                    [
+                        ("ABSOLUTE " if not relocation.relative else "")
+                        + relocation.symbol.name
+                        for relocation in relocations_for_argument
+                    ]
+                )
+                + (f" + {value}" if value else "")
+            )
         return "$" + str(value)
 
     def length_bits(self, configuration: "Configuration") -> int:

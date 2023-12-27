@@ -6,6 +6,7 @@ import re
 from monistode_binutils_shared.relocation import SymbolRelocationParams
 
 from ..exceptions import ParserError
+from .label import Label, LabelParser
 
 
 @dataclass
@@ -59,7 +60,16 @@ class ImmediateParser:
         length = self._attempt_scan_chars(line, offset)
         if length is not None:
             return self._parse(line, offset, length)
-        return None
+        label = self._attempt_scan_label(line, offset)
+        if label is None:
+            return None
+        return Immediate(
+            length_in_chars=label.length_in_chars + 1,
+            value=label.value,
+            asint=label.asint,
+            n_bits=self.n_bits,
+            symbols=label.symbols,
+        )
 
     def _attempt_scan_decimal(self, line: str, offset: int) -> int | None:
         """Attempt to scan a decimal immediate from the line
@@ -133,6 +143,18 @@ class ImmediateParser:
         if offset >= len(line):
             return None
         return offset
+
+    def _attempt_scan_label(self, line: str, offset: int) -> Label | None:
+        """Attempt to scan a label from the line
+
+        Args:
+            line (str): The line to parse
+            offset (int): The offset to start parsing from
+
+        Returns:
+            Label | None: The label, or None if the line does not contain a label
+        """
+        return LabelParser(self.n_bits).attempt_scan(line, offset)
 
     def _parse(self, line: str, offset: int, length: int) -> Immediate:
         """Parse an immediate from the line

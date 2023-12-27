@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monistode-assembler"
-version = "0.1.22"
+version = "0.1.23"
 description = "An assembler for the Monistode set of ISA's"
 authors = ["rizerphe <44440399+rizerphe@users.noreply.github.com>"]
 readme = "README.md"
