@@ -257,7 +257,11 @@ class AddressArgument:
         configuration: "Configuration",
     ) -> str:
         if relocations_for_argument:
-            offset = value - end_of_command_offset
+            offset = (
+                (value - end_of_command_offset)
+                if relocations_for_argument[0].relative
+                else value
+            )
             if offset < 0:
                 offset += 1 << self.bits
             if offset >= 1 << self.bits:

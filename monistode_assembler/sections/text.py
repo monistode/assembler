@@ -96,7 +96,7 @@ class TextSectionParser:
                 acc_bytes += 1
 
             bit_offset = command_bits % self.parameters.byte
-            overlay_offsets: list[tuple[int, int, int]] = []
+            overlay_offsets: list[tuple[int, int, int, bool]] = []
             for symbol in argument.symbols:
                 self.text.add_raw_relocation(
                     SymbolRelocationParams(
@@ -108,17 +108,23 @@ class TextSectionParser:
                 )
                 relocation_byte_offset = acc_bytes - command_bytes
                 overlay_offsets.append(
-                    (symbol.offset + bit_offset, relocation_byte_offset, symbol.size)
+                    (
+                        symbol.offset + bit_offset,
+                        relocation_byte_offset,
+                        symbol.size,
+                        symbol.relative,
+                    )
                 )
 
             command_code <<= argument.n_bits
             command_code |= argument.asint % 2**argument.n_bits
             command_bits += argument.n_bits
 
-            for start, offset, size in overlay_offsets:
-                command_code = self.add_overlay(
-                    command_code, command_bits, start, offset, size
-                )
+            for start, offset, size, relative in overlay_offsets:
+                if relative:
+                    command_code = self.add_overlay(
+                        command_code, command_bits, start, offset, size
+                    )
 
             if i == n_pre_opcode_arguments - 1:
                 command_code <<= self.parameters.opcode_length
